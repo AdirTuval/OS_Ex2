@@ -4,26 +4,28 @@
 #include <cstdio>
 #include <cassert>
 #include "uthreads.h"
-#define NOT_SET -1
+#include <bits/stdc++.h>
+#define FIRST_ID 0
+using namespace std;
+
 class Scheduler{
 private:
-	explicit Scheduler(int quantum_usecs) : _quantum_usecs(quantum_usecs){}
-	Scheduler(Scheduler const&);              // Don't Implement
-	void operator=(Scheduler const&);
+	explicit Scheduler(int quantum_usecs) : _quantum_usecs(quantum_usecs){
+		_threads_id_queue.push(FIRST_ID);
+	}
 	const int _quantum_usecs;
+	priority_queue <int, vector<int>, greater<int>> _threads_id_queue;
 public:
+	Scheduler(Scheduler const&) = delete;
+	void operator=(Scheduler const&) = delete;
 	static Scheduler& getInstance(int quantum_usecs = 0){
 		static Scheduler instance(quantum_usecs);
 		return instance;
 	}
-	int getQuantumUsecs() const {return _quantum_usecs;}
 };
 
-/**
- * Global scheduler.
- */
 int uthread_init(int quantum_usecs){
-
+	Scheduler::getInstance(quantum_usecs);
 }
 int uthread_spawn(thread_entry_point entry_point);
 int uthread_terminate(int tid);
@@ -37,8 +39,6 @@ int uthread_get_quantums(int tid);
 
 int main(){
 	Scheduler &t = Scheduler::getInstance(20);
-	printf("%d", t.getQuantumUsecs());
-	Scheduler &c = Scheduler::getInstance(500);
-	printf("%d", c.getQuantumUsecs());
+	printf("hello");
 	return 0;
 }
