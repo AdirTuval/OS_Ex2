@@ -1,9 +1,5 @@
-<<<<<<< HEAD
 *.[oa]
 cmake-build-debug
 CMakeLists.txt
 desktop.ini
 .idea
-=======
-*.idea
->>>>>>> f399bf4 (add gitignore file)
