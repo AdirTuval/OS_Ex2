@@ -146,5 +146,6 @@ int main(void)
 {
     setup();
     jump_to_thread(0);
+    printf("hello");
     return 0;
 }
