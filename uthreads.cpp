@@ -39,7 +39,8 @@ private:
 	char * _stack;
 	const int _id;
 public:
-	explicit Thread(int id, thread_entry_point entry_point = nullptr) : _id(id), _state(ThreadState::READY) ,_env{0}{
+	explicit Thread(int id, thread_entry_point entry_point = nullptr) : _id(id), _state(ThreadState::READY), _env{0}{
+		//TODO if id is unused remove it
 		_stack = new char[STACK_SIZE];
 		int ret_val = sigsetjmp(_env, 1); // TODO check if savemask == 1
 		if(ret_val == 0){
@@ -52,8 +53,11 @@ public:
 			sigemptyset(&_env->__saved_mask);
 		}
 	}
+	int get_id() const {return _id;}
+	ThreadState get_state() const {return _state;}
+	void set_state(ThreadState new_state) {_state = new_state;}
 	~Thread(){
-		delete _stack;
+		delete[] _stack;
 		printf("Thread deleted");
 	}
 
@@ -61,54 +65,97 @@ public:
 
 class Scheduler{
 private:
-	explicit Scheduler(int quantum_usecs) : _quantum_usecs(quantum_usecs){
-		_used_threads_id.push(FIRST_ID);
+	explicit Scheduler(int quantum_usecs) : _quantum_usecs(quantum_usecs), _active_thread_id(FIRST_ID){
+		_unused_threads_id.push(FIRST_ID);
 		_largest_thread_id = FIRST_ID;
-		_create_thread();
+		create_thread(nullptr);
 	}
 	const int _quantum_usecs;
 	int _largest_thread_id;
-	priority_queue <int, vector<int>, greater<int>> _used_threads_id;
+	int _active_thread_id;
+	priority_queue <int, vector<int>, greater<int>> _unused_threads_id;
 	unordered_map<int, Thread *> _active_threads;
-	queue<Thread *> _ready_queue;
+	deque<Thread *> _ready_queue;
 public:
-	int _create_thread(thread_entry_point entry_point);
-	int _create_thread();
+	int create_thread(thread_entry_point entry_point);
+	int terminate_thread(int tid);
 	int _generate_thread_id();
 	Scheduler(Scheduler const&) = delete;
 	void operator=(Scheduler const&) = delete;
+	int _erase_from_ready_queue(int tid);
 	static Scheduler& getInstance(int quantum_usecs = 0){
 		static Scheduler instance(quantum_usecs);
 		return instance;
+	}
+
+	~Scheduler(){
+		if(!_active_threads.empty()) {
+			for(unordered_map<int,Thread *>::iterator it=_active_threads.begin() ; it!=_active_threads.end() ; it++){
+				delete it->second;
+			}
+			_active_threads.clear();
+		}
 	}
 };
 
 int Scheduler::_generate_thread_id()
 {
-	if(!_used_threads_id.empty()){
+	if(!_unused_threads_id.empty()){
 	//There's an available used id.
-		int id = _used_threads_id.top();
-		_used_threads_id.pop();
+		int id = _unused_threads_id.top();
+		_unused_threads_id.pop();
 		return id;
 	}
 	//No used ID, generate new ID.
-	return _largest_thread_id;
+	return ++_largest_thread_id;
 }
 
-int Scheduler::_create_thread(thread_entry_point entry_point)
+int Scheduler::create_thread(thread_entry_point entry_point)
 {
 	if(_active_threads.size() >= MAX_THREAD_NUM){
 		return FAILURE;
 	}
 	try {
 		int thread_id = _generate_thread_id();
-		auto * new_thread = new Thread(entry_point);
+		auto * new_thread = new Thread(thread_id, entry_point);
 		_active_threads[thread_id] = new_thread;
-		_ready_queue.push(new_thread);
+		_ready_queue.push_back(new_thread);
 		return thread_id;
 	} catch (bad_alloc&){
 		return FAILURE;
 	}
+}
+
+int Scheduler::terminate_thread(int tid) {
+	if(_active_threads.find(tid) == _active_threads.end()){
+		return FAILURE;
+	}
+	//TODO if thread is running, then we should push new thread to running
+	Thread * thread_to_terminate = _active_threads[tid];
+	if(thread_to_terminate->get_state() == ThreadState::RUNNING){
+		//run new thread
+		_run_top_thread();
+	}
+	else if(thread_to_terminate->get_state() == ThreadState::READY){
+		if(_erase_from_ready_queue(tid) == FAILURE){
+		//TODO print error
+			return FAILURE;
+		}
+	}
+	_active_threads.erase(tid);
+	_unused_threads_id.push(tid);
+	delete thread_to_terminate;
+	return SUCCESS;
+}
+
+int Scheduler::_erase_from_ready_queue(int tid) {
+	for (deque<Thread *>::iterator it = _ready_queue.begin(); it != _ready_queue.end(); ++it){
+		if((*it)->get_id() == tid){
+			_ready_queue.erase(it);
+			return SUCCESS;
+		}
+	}
+	return FAILURE;
 }
 
 
@@ -120,12 +167,20 @@ int uthread_init(int quantum_usecs){
 	return SUCCESS;
 }
 int uthread_spawn(thread_entry_point entry_point){
- //sigsetjump
+	Scheduler &scheduler = Scheduler::getInstance();
+	return scheduler.create_thread(entry_point);
 }
 int uthread_terminate(int tid){
 	Scheduler &scheduler = Scheduler::getInstance();
+	if(tid == 0){
+		scheduler.~Scheduler();
+		exit(0);
+	}
+	return scheduler.terminate_thread(tid);
 }
-int uthread_block(int tid);
+int uthread_block(int tid){
+
+}
 int uthread_resume(int tid);
 int uthread_sleep(int num_quantums);
 int uthread_get_tid();
@@ -134,6 +189,8 @@ int uthread_get_quantums(int tid);
 
 int main(){
 	Scheduler &t = Scheduler::getInstance(20);
-//	t._create_thread();
+	printf("%d",t._generate_thread_id());
+	printf("%d",t._generate_thread_id());
+	printf("%d",t._generate_thread_id());
 	return 0;
 }
