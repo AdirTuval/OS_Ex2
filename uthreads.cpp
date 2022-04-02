@@ -46,7 +46,7 @@ public:
 		sigsetjmp(_env, 1); // TODO check if savemask == 1
 		(_env->__jmpbuf)[JB_SP] = translate_address(sp);
 		(_env->__jmpbuf)[JB_PC] = translate_address(pc);
-		sigemptyset(_env->__saved_mask);
+		sigemptyset(&_env->__saved_mask);
 	}
 	~Thread(){
 		delete _stack;
