@@ -9,7 +9,15 @@
 #define SUCCESS 0
 #define FAILURE 1
 using namespace std;
+
+enum ThreadState {RUNNING, READY, BLOCKED, TERMINATED};
+
+
 class Thread{
+private:
+	ThreadState _state;
+public:
+	Thread() : _state(READY){}
 
 };
 
@@ -23,7 +31,8 @@ private:
 	const int _quantum_usecs;
 	int _largest_thread_id;
 	priority_queue <int, vector<int>, greater<int>> _used_threads_id;
-	map<int, Thread> _active_threads;
+	unordered_map<int, Thread> _active_threads;
+	queue<Thread> _ready_queue;
 	int _create_thread();
 	int _generate_thread_id();
 public:
@@ -49,9 +58,14 @@ int Scheduler::_generate_thread_id()
 
 int Scheduler::_create_thread()
 {
+	if(_active_threads.size() >= MAX_THREAD_NUM){
+		return FAILURE;
+	}
 	int thread_id = _generate_thread_id();
-	_active_threads[thread_id] = Thread();
-	return 0;
+	Thread new_thread = Thread();
+	_active_threads[thread_id] = new_thread;
+	_ready_queue.push(new_thread);
+	return SUCCESS;
 }
 
 
@@ -59,8 +73,12 @@ int uthread_init(int quantum_usecs){
 	Scheduler::getInstance(quantum_usecs);
 	return 0;
 }
-int uthread_spawn(thread_entry_point entry_point);
-int uthread_terminate(int tid);
+int uthread_spawn(thread_entry_point entry_point){
+
+}
+int uthread_terminate(int tid){
+	Scheduler &scheduler = Scheduler::getInstance();
+}
 int uthread_block(int tid);
 int uthread_resume(int tid);
 int uthread_sleep(int num_quantums);
@@ -68,9 +86,7 @@ int uthread_get_tid();
 int uthread_get_total_quantums();
 int uthread_get_quantums(int tid);
 
-
 int main(){
 	Scheduler &t = Scheduler::getInstance(20);
-	printf("hello");
 	return 0;
 }
