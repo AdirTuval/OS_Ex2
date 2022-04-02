@@ -39,23 +39,18 @@ private:
 	char * _stack;
 	const int _id;
 public:
-	Thread(int id, thread_entry_point entry_point = nullptr) : _id(id), _state(ThreadState::READY){
+	explicit Thread(int id, thread_entry_point entry_point = nullptr) : _id(id), _state(ThreadState::READY) ,_env{0}{
 		_stack = new char[STACK_SIZE];
-		address_t sp = (address_t) _stack + STACK_SIZE - sizeof(address_t);
 		int ret_val = sigsetjmp(_env, 1); // TODO check if savemask == 1
 		if(ret_val == 0){
-
+			if(entry_point != nullptr){
+				address_t pc = (address_t) entry_point;
+				(_env->__jmpbuf)[JB_PC] = translate_address(pc);
+				address_t sp = (address_t) _stack + STACK_SIZE - sizeof(address_t);
+				(_env->__jmpbuf)[JB_SP] = translate_address(sp);
+			}
+			sigemptyset(&_env->__saved_mask);
 		}
-		(_env->__jmpbuf)[JB_SP] = translate_address(sp);
-		if(entry_point != nullptr){
-			address_t pc = (address_t) entry_point;
-			(_env->__jmpbuf)[JB_PC] = translate_address(pc);
-		}
-
-
-
-
-		sigemptyset(&_env->__saved_mask);
 	}
 	~Thread(){
 		delete _stack;
