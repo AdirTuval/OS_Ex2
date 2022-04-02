@@ -37,15 +37,24 @@ private:
 	ThreadState _state;
 	sigjmp_buf _env;
 	char * _stack;
+	const int _id;
 public:
-	Thread(thread_entry_point entry_point){
-		_state = ThreadState::READY;
+	Thread(int id, thread_entry_point entry_point = nullptr) : _id(id), _state(ThreadState::READY){
 		_stack = new char[STACK_SIZE];
 		address_t sp = (address_t) _stack + STACK_SIZE - sizeof(address_t);
-		address_t pc = (address_t) entry_point;
-		sigsetjmp(_env, 1); // TODO check if savemask == 1
+		int ret_val = sigsetjmp(_env, 1); // TODO check if savemask == 1
+		if(ret_val == 0){
+
+		}
 		(_env->__jmpbuf)[JB_SP] = translate_address(sp);
-		(_env->__jmpbuf)[JB_PC] = translate_address(pc);
+		if(entry_point != nullptr){
+			address_t pc = (address_t) entry_point;
+			(_env->__jmpbuf)[JB_PC] = translate_address(pc);
+		}
+
+
+
+
 		sigemptyset(&_env->__saved_mask);
 	}
 	~Thread(){
@@ -60,7 +69,7 @@ private:
 	explicit Scheduler(int quantum_usecs) : _quantum_usecs(quantum_usecs){
 		_used_threads_id.push(FIRST_ID);
 		_largest_thread_id = FIRST_ID;
-//		_create_thread();
+		_create_thread();
 	}
 	const int _quantum_usecs;
 	int _largest_thread_id;
@@ -69,6 +78,7 @@ private:
 	queue<Thread *> _ready_queue;
 public:
 	int _create_thread(thread_entry_point entry_point);
+	int _create_thread();
 	int _generate_thread_id();
 	Scheduler(Scheduler const&) = delete;
 	void operator=(Scheduler const&) = delete;
