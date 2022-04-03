@@ -1,8 +1,9 @@
 file(REMOVE_RECURSE
+  "CMakeFiles/Ex2.dir/scheduler.cpp.o"
+  "CMakeFiles/Ex2.dir/thread.cpp.o"
   "CMakeFiles/Ex2.dir/uthreads.cpp.o"
-  "Ex2.exe"
+  "Ex2"
   "Ex2.pdb"
-  "libEx2.dll.a"
 )
 
 # Per-language clean rules from dependency scanning.

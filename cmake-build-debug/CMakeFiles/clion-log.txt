@@ -1,11 +1,4 @@
-C:\Users\adirt\.CLion2019.3\system\cygwin_cmake\bin\cmake.exe -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /cygdrive/c/Users/adirt/Documents/University/Year_3/Semester_2/OS_67808/Ex2
--- The CXX compiler identification is GNU 9.2.0
--- Check for working CXX compiler: /usr/bin/c++.exe
--- Check for working CXX compiler: /usr/bin/c++.exe -- works
--- Detecting CXX compiler ABI info
--- Detecting CXX compiler ABI info - done
--- Detecting CXX compile features
--- Detecting CXX compile features - done
+/usr/local/APP/jetbrains/clion/2021.2/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_DEPENDS_USE_COMPILER=FALSE -G "CodeBlocks - Unix Makefiles" /cs/usr/adirt/OS/ex2/OS_Ex2
 -- Configuring done
 -- Generating done
--- Build files have been written to: /cygdrive/c/Users/adirt/Documents/University/Year_3/Semester_2/OS_67808/Ex2/cmake-build-debug
+-- Build files have been written to: /cs/usr/adirt/OS/ex2/OS_Ex2/cmake-build-debug

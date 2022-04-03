@@ -5,4 +5,4 @@ set(CMAKE_CXX_STANDARD 14)
 
 include_directories(.)
 
-add_executable(Ex2 uthreads.h uthreads.cpp)
+add_executable(Ex2 uthreads.h uthreads.cpp scheduler.cpp scheduler.h thread.cpp thread.h utils.h)

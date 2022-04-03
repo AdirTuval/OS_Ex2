@@ -6,17 +6,43 @@
 
 #IncludeRegexTransform: 
 
-/cygdrive/c/Users/adirt/Documents/University/Year_3/Semester_2/OS_67808/Ex2/uthreads.cpp
-cstdio
--
-cassert
--
-uthreads.h
-/cygdrive/c/Users/adirt/Documents/University/Year_3/Semester_2/OS_67808/Ex2/uthreads.h
+/cs/usr/adirt/OS/ex2/OS_Ex2/scheduler.cpp
+scheduler.h
+/cs/usr/adirt/OS/ex2/OS_Ex2/scheduler.h
+
+/cs/usr/adirt/OS/ex2/OS_Ex2/scheduler.h
 bits/stdc++.h
 -
 csetjmp
 -
+thread.h
+/cs/usr/adirt/OS/ex2/OS_Ex2/thread.h
 
-/cygdrive/c/Users/adirt/Documents/University/Year_3/Semester_2/OS_67808/Ex2/uthreads.h
+/cs/usr/adirt/OS/ex2/OS_Ex2/thread.cpp
+thread.h
+/cs/usr/adirt/OS/ex2/OS_Ex2/thread.h
+utils.h
+/cs/usr/adirt/OS/ex2/OS_Ex2/utils.h
+
+/cs/usr/adirt/OS/ex2/OS_Ex2/thread.h
+csetjmp
+-
+csignal
+-
+cstdio
+-
+uthreads.h
+/cs/usr/adirt/OS/ex2/OS_Ex2/uthreads.h
+
+/cs/usr/adirt/OS/ex2/OS_Ex2/uthreads.cpp
+cstdio
+-
+uthreads.h
+/cs/usr/adirt/OS/ex2/OS_Ex2/uthreads.h
+scheduler.h
+/cs/usr/adirt/OS/ex2/OS_Ex2/scheduler.h
+
+/cs/usr/adirt/OS/ex2/OS_Ex2/uthreads.h
+
+/cs/usr/adirt/OS/ex2/OS_Ex2/utils.h
 
