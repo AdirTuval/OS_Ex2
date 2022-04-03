@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/cygdrive/c/Users/adirt/Documents/University/Year_3/Semester_2/OS_67808/Ex2/uthreads.cpp
+cstdio
+-
+cassert
+-
+uthreads.h
+/cygdrive/c/Users/adirt/Documents/University/Year_3/Semester_2/OS_67808/Ex2/uthreads.h
+bits/stdc++.h
+-
+csetjmp
+-
+
+/cygdrive/c/Users/adirt/Documents/University/Year_3/Semester_2/OS_67808/Ex2/uthreads.h
+
