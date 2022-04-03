@@ -24,8 +24,7 @@ int Scheduler::create_thread(thread_entry_point entry_point)
     }
     try {
         int thread_id = _generate_thread_id();
-//        auto * new_thread = new Thread(thread_id, entry_point);
-        auto * new_thread = new Thread(thread_id);
+        auto * new_thread = new Thread(thread_id, entry_point);
         _active_threads[thread_id] = new_thread;
         _ready_queue.push_back(new_thread);
         return thread_id;
@@ -40,20 +39,19 @@ int Scheduler::terminate_thread(int tid) {
     }
     //TODO if thread is running, then we should push new thread to running
     Thread * thread_to_terminate = _active_threads[tid];
-    if(thread_to_terminate->get_state() == ThreadState::RUNNING){
-        //run new thread
-        //		_run_top_thread();
+    if(thread_to_terminate->get_state() == ThreadState::RUNNING || thread_to_terminate->get_state() == ThreadState::BLOCKED){
+        _active_threads.erase(tid);
+        _unused_threads_id.push(tid);
+        delete thread_to_terminate;
+         _run_top_thread();
     }
-    else if(thread_to_terminate->get_state() == ThreadState::READY){
+    else { // Thread is ready.
         if(_erase_from_ready_queue(tid) == FAILURE){
             //TODO print error
             return FAILURE;
         }
+        return SUCCESS;
     }
-    _active_threads.erase(tid);
-    _unused_threads_id.push(tid);
-    delete thread_to_terminate;
-    return SUCCESS;
 }
 
 int Scheduler::_erase_from_ready_queue(int tid) {
@@ -64,4 +62,45 @@ int Scheduler::_erase_from_ready_queue(int tid) {
         }
     }
     return FAILURE;
+}
+
+int Scheduler::_run_top_thread(){
+    //pop from queue
+    //change running current thread id
+    //jump
+    if(_ready_queue.empty()){
+        return FAILURE;
+    }
+    Thread * front_thread = _ready_queue.front();
+    _ready_queue.pop_front();
+    assert(front_thread->get_state() == ThreadState::READY);
+    front_thread->set_running();
+    _running_thread_id = front_thread->get_id();
+    front_thread->jump();
+    return SUCCESS;
+}
+
+int Scheduler::block_thread(int tid) {
+    //Assuming tid != 0
+    assert(tid != 0);
+    if(_active_threads.find(tid) == _active_threads.end()){
+        return FAILURE;
+    }
+    Thread * thread_to_block = _active_threads[tid];
+    thread_to_block->set_block();
+    switch(thread_to_block->get_state()){
+        case RUNNING:
+            assert(_running_thread_id == tid);
+            _run_top_thread();
+
+            break;
+        case READY:
+            if(_erase_from_ready_queue(tid) != SUCCESS){
+                return FAILURE;
+            }
+            break;
+        case BLOCKED:
+            return SUCCESS;
+    }
+    return SUCCESS;
 }

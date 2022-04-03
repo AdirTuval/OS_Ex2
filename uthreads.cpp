@@ -27,7 +27,11 @@ int uthread_terminate(int tid){
 	return scheduler.terminate_thread(tid);
 }
 int uthread_block(int tid){
-
+    if(tid == 0){
+        return FAILURE;
+    }
+    Scheduler &scheduler = Scheduler::getInstance();
+    return scheduler.block_thread(tid);
 }
 int uthread_resume(int tid);
 int uthread_sleep(int num_quantums);
@@ -36,9 +40,7 @@ int uthread_get_total_quantums();
 int uthread_get_quantums(int tid);
 
 int main(){
-	Scheduler &t = Scheduler::getInstance(20);
-	printf("%d",t._generate_thread_id());
-	printf("%d",t._generate_thread_id());
-	printf("%d",t._generate_thread_id());
+    uthread_init(50);
+    printf("Hello World");
 	return 0;
 }

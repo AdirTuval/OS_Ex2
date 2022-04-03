@@ -8,7 +8,7 @@
 #include <csignal>
 #include <cstdio>
 #include "uthreads.h"
-enum ThreadState {RUNNING, READY, BLOCKED, TERMINATED};
+enum ThreadState {RUNNING, READY, BLOCKED};
 class Thread{
 private:
     ThreadState _state;
@@ -19,7 +19,10 @@ public:
     explicit Thread(int id ,thread_entry_point entry_point = nullptr);
     int get_id() const {return _id;}
     ThreadState get_state() const {return _state;}
-    void set_state(ThreadState new_state) {_state = new_state;}
+    void set_block() {_state = ThreadState::BLOCKED;}
+    void set_running() {_state = ThreadState::RUNNING;}
+    void set_ready() {_state = ThreadState::READY;}
+    void jump();
     ~Thread(){
         delete[] _stack;
         printf("Thread deleted");
