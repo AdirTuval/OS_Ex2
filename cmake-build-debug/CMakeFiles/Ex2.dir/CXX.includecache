@@ -31,6 +31,8 @@ thread.h
 /cs/usr/adirt/OS/ex2/OS_Ex2/thread.h
 utils.h
 /cs/usr/adirt/OS/ex2/OS_Ex2/utils.h
+cassert
+-
 
 /cs/usr/adirt/OS/ex2/OS_Ex2/thread.h
 csetjmp

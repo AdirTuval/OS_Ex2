@@ -39,35 +39,32 @@ int uthread_resume(int tid){
 }
 int uthread_sleep(int num_quantums){
     Scheduler &scheduler = Scheduler::getInstance();
-    if(scheduler.current_running_thread_id() == MAIN_THREAD_ID){
+    if(scheduler.get_current_running_thread_id() == MAIN_THREAD_ID){
         return FAILURE;
     }
     scheduler.sleep_thread(num_quantums);
     return 0;
 }
-int uthread_get_tid();
-int uthread_get_total_quantums();
-int uthread_get_quantums(int tid);
+int uthread_get_tid(){
+    return Scheduler::getInstance().get_current_running_thread_id();
+}
+int uthread_get_total_quantums(){
+    return Scheduler::getInstance().get_total_quantoms();
+}
+int uthread_get_quantums(int tid){
+    return Scheduler::getInstance().get_quantoms_running_num(tid);
+}
 
 int main(){
-    uthread_init(3000000L);
-    uthread_spawn(nullptr);
+    uthread_init(1000000L);
     uthread_spawn(nullptr);
     uthread_spawn(nullptr);
     Scheduler &scheduler = Scheduler::getInstance();
-    int gotosleep = 0;
+    int quantoms = 4;
     int cur_id = 0;
     bool new_id = true;
     for(;;){
-        if(new_id){
-            new_id = false;
-            printf("%d", cur_id);
-            fflush(stdout);
-        }
-        if(scheduler.current_running_thread_id() != cur_id){
-            cur_id = scheduler.current_running_thread_id();
-            new_id = true;
-        }
+
     }
 	return 0;
 }

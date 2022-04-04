@@ -12,28 +12,18 @@
 #include <sys/time.h>
 #include <ctime>
 #include "thread.h"
-
-
 using namespace std;
 void time_handler(int sig);
 class Scheduler{
 private:
-    explicit Scheduler(int quantum_usecs) : _quantum_usecs(quantum_usecs), _running_thread_id(MAIN_THREAD_ID){
-        _unused_threads_id.push(MAIN_THREAD_ID);
-        _largest_thread_id = MAIN_THREAD_ID;
-        create_thread(nullptr);
-        _init_timer_for_a_quantom();
-
-        _ready_queue.pop_front(); //popping first thread.
-        _active_threads[MAIN_THREAD_ID]->set_running();
-
-    }
+    explicit Scheduler(int quantum_usecs);
     const int _quantum_usecs;
     int _largest_thread_id;
     int _running_thread_id;
+    int _total_quantoms;
     priority_queue <int, vector<int>, greater<int>> _unused_threads_id;
     unordered_map<int, Thread *> _active_threads;
-    unordered_map<int, int> _sleeping_threads; //_sleeping_threads[thread_id] = quantoms_left_to_wake
+    unordered_set<Thread *> _sleeping_threads; //_sleeping_threads
     deque<Thread *> _ready_queue;
 public:
     int create_thread(thread_entry_point entry_point);
@@ -51,11 +41,14 @@ public:
     int resume_thread(int tid);
     int sleep_thread(int num_quantums);
     int _init_timer_for_a_quantom() const;
-    int current_running_thread_id() const {return _running_thread_id;}
-    ~Scheduler();
+    int get_current_running_thread_id() const {return _running_thread_id;}
     void _time_handler();
-
     Thread *stop_and_retrieve_running_thread();
+    void update_sleeping_threads();
+    int get_quantoms_running_num(int tid);
+    ~Scheduler();
+
+    int get_total_quantoms() const;
 };
 
 
