@@ -26,6 +26,12 @@ ctime
 thread.h
 /cs/usr/adirt/OS/ex2/OS_Ex2/thread.h
 
+/cs/usr/adirt/OS/ex2/OS_Ex2/thread.cpp
+thread.h
+/cs/usr/adirt/OS/ex2/OS_Ex2/thread.h
+utils.h
+/cs/usr/adirt/OS/ex2/OS_Ex2/utils.h
+
 /cs/usr/adirt/OS/ex2/OS_Ex2/thread.h
 csetjmp
 -
@@ -45,4 +51,6 @@ scheduler.h
 /cs/usr/adirt/OS/ex2/OS_Ex2/scheduler.h
 
 /cs/usr/adirt/OS/ex2/OS_Ex2/uthreads.h
+
+/cs/usr/adirt/OS/ex2/OS_Ex2/utils.h
 

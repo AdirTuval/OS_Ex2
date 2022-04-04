@@ -22,7 +22,7 @@ private:
         _unused_threads_id.push(MAIN_THREAD_ID);
         _largest_thread_id = MAIN_THREAD_ID;
         create_thread(nullptr);
-        _init_timer();
+        _init_timer_for_a_quantom();
 
         _ready_queue.pop_front(); //popping first thread.
         _active_threads[MAIN_THREAD_ID]->set_running();
@@ -33,6 +33,7 @@ private:
     int _running_thread_id;
     priority_queue <int, vector<int>, greater<int>> _unused_threads_id;
     unordered_map<int, Thread *> _active_threads;
+    unordered_map<int, int> _sleeping_threads; //_sleeping_threads[thread_id] = quantoms_left_to_wake
     deque<Thread *> _ready_queue;
 public:
     int create_thread(thread_entry_point entry_point);
@@ -45,21 +46,16 @@ public:
         static Scheduler instance(quantum_usecs);
         return instance;
     }
-    int _run_top_thread();
+    int run_topmost_thread_in_queue();
     int block_thread(int tid);
     int resume_thread(int tid);
-    int sleep_thread();
-    int _init_timer();
+    int sleep_thread(int num_quantums);
+    int _init_timer_for_a_quantom() const;
+    int current_running_thread_id() const {return _running_thread_id;}
+    ~Scheduler();
+    void _time_handler();
 
-    ~Scheduler(){
-        if(!_active_threads.empty()) {
-            for(unordered_map<int,Thread *>::iterator it=_active_threads.begin() ; it!=_active_threads.end() ; it++){
-                delete it->second;
-            }
-            _active_threads.clear();
-        }
-        printf("Scheduler deleted.");
-    }
+    Thread *stop_and_retrieve_running_thread();
 };
 
 

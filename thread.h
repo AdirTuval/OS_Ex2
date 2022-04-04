@@ -15,6 +15,7 @@ private:
     sigjmp_buf _env;
     char * _stack;
     const int _id;
+    bool _is_sleeping;
 public:
     explicit Thread(int id ,thread_entry_point entry_point = nullptr);
     int get_id() const {return _id;}
@@ -22,12 +23,19 @@ public:
     void set_block() {_state = ThreadState::BLOCKED;}
     void set_running() {_state = ThreadState::RUNNING;}
     void set_ready() {_state = ThreadState::READY;}
-    void jump();
+    void go_to_sleep() { _is_sleeping = true;}
+    bool is_sleeping() const {return _is_sleeping;}
+    void do_jump();
     ~Thread(){
         delete[] _stack;
         printf("Thread deleted");
     }
 
+    bool is_running() const {return _state == ThreadState::RUNNING;}
+    bool is_blocked() const {return _state == ThreadState::BLOCKED;}
+    bool is_ready() const {return _state == ThreadState::READY;}
+
+    void set_jump();
 };
 
 
