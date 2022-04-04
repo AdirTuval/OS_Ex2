@@ -7,18 +7,26 @@
 #define MAIN_THREAD_ID 0
 #include <bits/stdc++.h>
 #include <csetjmp>
+#include <cstdio>
+#include <csignal>
+#include <sys/time.h>
+#include <ctime>
 #include "thread.h"
 
-using namespace std;
 
+using namespace std;
+void time_handler(int sig);
 class Scheduler{
 private:
     explicit Scheduler(int quantum_usecs) : _quantum_usecs(quantum_usecs), _running_thread_id(MAIN_THREAD_ID){
         _unused_threads_id.push(MAIN_THREAD_ID);
         _largest_thread_id = MAIN_THREAD_ID;
         create_thread(nullptr);
+        _init_timer();
+
         _ready_queue.pop_front(); //popping first thread.
         _active_threads[MAIN_THREAD_ID]->set_running();
+
     }
     const int _quantum_usecs;
     int _largest_thread_id;
@@ -39,6 +47,9 @@ public:
     }
     int _run_top_thread();
     int block_thread(int tid);
+    int resume_thread(int tid);
+    int sleep_thread();
+    int _init_timer();
 
     ~Scheduler(){
         if(!_active_threads.empty()) {

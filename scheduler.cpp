@@ -5,6 +5,11 @@
 #include "scheduler.h"
 #define FAILURE -1
 #define SUCCESS 0
+
+void time_handler(int sig){
+    printf("Heil!!!!\n");
+}
+
 int Scheduler::_generate_thread_id()
 {
     if(!_unused_threads_id.empty()){
@@ -15,6 +20,30 @@ int Scheduler::_generate_thread_id()
     }
     //No used ID, generate new ID.
     return ++_largest_thread_id;
+}
+
+int Scheduler::_init_timer(){
+    struct sigaction sa = {nullptr};
+    sa.sa_handler = &time_handler;
+    if (sigaction(SIGVTALRM, &sa, nullptr) < 0) {
+        printf("sigaction error.");
+        return FAILURE;
+    }
+    struct itimerval timer = {0};
+    timer.it_value.tv_sec = 0;        // first time interval, seconds part
+    timer.it_value.tv_usec = _quantum_usecs;        // first time interval, microseconds part
+
+    // configure the timer to expire every 3 sec after that.
+    timer.it_interval.tv_sec = 0;    // following time intervals, seconds part
+    timer.it_interval.tv_usec = _quantum_usecs;    // following time intervals, microseconds part
+
+    int t = setitimer(ITIMER_VIRTUAL, &timer, NULL);
+    if (t != SUCCESS){
+        printf( "%s", std::strerror(errno) );
+        printf("setitimer error.\n");
+        return FAILURE;
+    }
+    return SUCCESS;
 }
 
 int Scheduler::create_thread(thread_entry_point entry_point)
@@ -44,6 +73,7 @@ int Scheduler::terminate_thread(int tid) {
         _unused_threads_id.push(tid);
         delete thread_to_terminate;
          _run_top_thread();
+         return SUCCESS;
     }
     else { // Thread is ready.
         if(_erase_from_ready_queue(tid) == FAILURE){
@@ -102,5 +132,22 @@ int Scheduler::block_thread(int tid) {
         case BLOCKED:
             return SUCCESS;
     }
+    return SUCCESS;
+}
+
+int Scheduler::resume_thread(int tid) {
+    if(_active_threads.find(tid) == _active_threads.end()){
+        return FAILURE;
+    }
+    Thread * thread_to_resume = _active_threads[tid];
+    if(thread_to_resume->get_state() == ThreadState::BLOCKED){
+        thread_to_resume->set_ready();
+        _ready_queue.push_back(thread_to_resume);
+    }
+    return SUCCESS;
+}
+
+int Scheduler::sleep_thread() {
+    assert(_running_thread_id != MAIN_THREAD_ID);
     return SUCCESS;
 }

@@ -33,14 +33,21 @@ int uthread_block(int tid){
     Scheduler &scheduler = Scheduler::getInstance();
     return scheduler.block_thread(tid);
 }
-int uthread_resume(int tid);
-int uthread_sleep(int num_quantums);
+int uthread_resume(int tid){
+    Scheduler &scheduler = Scheduler::getInstance();
+    return scheduler.resume_thread(tid);
+}
+int uthread_sleep(int num_quantums){
+    Scheduler &scheduler = Scheduler::getInstance();
+//    if(scheduler)
+    return 0;
+}
 int uthread_get_tid();
 int uthread_get_total_quantums();
 int uthread_get_quantums(int tid);
 
 int main(){
-    uthread_init(50);
+    uthread_init(3000000L);
     printf("Hello World");
 	return 0;
 }
