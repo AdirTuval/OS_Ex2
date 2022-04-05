@@ -6,33 +6,16 @@
 #define FAILURE -1
 #define SUCCESS 0
 #define USEC_IN_SEC 1000000
-
-int t = 0;
-int blocked_thread_id = -1;
-void time_handler(int sig){
-    t++;
-    Scheduler &scheduler = Scheduler::getInstance();
-    scheduler._time_handler();
-    printf("Current running thread: %d. Quantoms alive: %d. Total quantoms: %d.\n", uthread_get_tid(), uthread_get_quantums(uthread_get_tid()), uthread_get_total_quantums());
-    if(t == 5){
-        printf("Thread %d is blocked.\n",uthread_get_tid());
-        blocked_thread_id = uthread_get_tid();
-        uthread_block(blocked_thread_id);
-    }
-    if(t == 10){
-        printf("Thread %d is resumed..\n",blocked_thread_id);
-        uthread_resume(blocked_thread_id);
-    }
-}
+#define ERR_MSG_BAD_ALLOCATION "system error: stack allocation failed.\n"
 
 Scheduler::Scheduler(int quantum_usecs) : _quantum_usecs(quantum_usecs), _running_thread_id(MAIN_THREAD_ID), _total_quantoms(1){
     _unused_threads_id.push(MAIN_THREAD_ID);
     _largest_thread_id = MAIN_THREAD_ID;
     create_thread(nullptr);
-    run_topmost_thread_in_queue();
+    run_topmost_thread_in_ready_queue();
 }
 
-int Scheduler::_generate_thread_id()
+int Scheduler::generate_thread_id()
 {
     if(!_unused_threads_id.empty()){
         //There's an available used id.
@@ -44,9 +27,9 @@ int Scheduler::_generate_thread_id()
     return ++_largest_thread_id;
 }
 
-int Scheduler::_init_timer_for_a_quantom() const{
+int Scheduler::init_timer_for_a_quantom() const{
     struct sigaction sa = {nullptr};
-    sa.sa_handler = &time_handler;
+    sa.sa_handler = &static_external_time_handler;
     if (sigaction(SIGVTALRM, &sa, nullptr) < 0) {
         printf("sigaction error.");
         return FAILURE;
@@ -72,15 +55,17 @@ int Scheduler::create_thread(thread_entry_point entry_point)
     if(_active_threads.size() >= MAX_THREAD_NUM){
         return FAILURE;
     }
+    int thread_id = generate_thread_id();
+    Thread * new_thread;
     try {
-        int thread_id = _generate_thread_id();
-        auto * new_thread = new Thread(thread_id, entry_point);
-        _active_threads[thread_id] = new_thread;
-        _ready_queue.push_back(new_thread);
-        return thread_id;
+        new_thread = new Thread(thread_id, entry_point);
     } catch (bad_alloc&){
-        return FAILURE;
+        cerr << ERR_MSG_BAD_ALLOCATION;
+        exit(1);
     }
+    _active_threads[thread_id] = new_thread;
+    _ready_queue.push_back(new_thread);
+    return thread_id;
 }
 
 int Scheduler::terminate_thread(int tid) {
@@ -94,11 +79,11 @@ int Scheduler::terminate_thread(int tid) {
         _active_threads.erase(tid);
         _unused_threads_id.push(tid);
         delete thread_to_terminate;
-        run_topmost_thread_in_queue();
+        run_topmost_thread_in_ready_queue();
          return SUCCESS;
     }
     else { // Thread is ready.
-        if(_erase_from_ready_queue(tid) == FAILURE){
+        if(erase_thread_from_ready_queue(tid) == FAILURE){
             //TODO print error
             return FAILURE;
         }
@@ -106,7 +91,7 @@ int Scheduler::terminate_thread(int tid) {
     }
 }
 
-int Scheduler::_erase_from_ready_queue(int tid) {
+int Scheduler::erase_thread_from_ready_queue(int tid) {
     for (auto it = _ready_queue.begin(); it != _ready_queue.end(); ++it){
         if((*it)->get_id() == tid){
             _ready_queue.erase(it);
@@ -116,7 +101,12 @@ int Scheduler::_erase_from_ready_queue(int tid) {
     return FAILURE;
 }
 
-int Scheduler::run_topmost_thread_in_queue(){
+Scheduler &Scheduler::getInstance(int quantum_usecs) {
+    static Scheduler instance(quantum_usecs);
+    return instance;
+}
+
+int Scheduler::run_topmost_thread_in_ready_queue(){
     //pop from queue
     //change running current thread id
     //init timer for a quantom
@@ -129,7 +119,7 @@ int Scheduler::run_topmost_thread_in_queue(){
     assert(front_thread->is_ready());
     front_thread->set_running();
     _running_thread_id = front_thread->get_id();
-    _init_timer_for_a_quantom();
+    init_timer_for_a_quantom();
 //    front_thread->do_jump();
     return SUCCESS;
 }
@@ -144,9 +134,9 @@ int Scheduler::block_thread(int tid) {
     if(thread_to_block->is_running()){
         assert(_running_thread_id == tid);
         stop_and_retrieve_running_thread();
-        run_topmost_thread_in_queue();
+        run_topmost_thread_in_ready_queue();
     }else if(thread_to_block->is_ready()){
-        if(_erase_from_ready_queue(tid) != SUCCESS){
+        if(erase_thread_from_ready_queue(tid) != SUCCESS){
             return FAILURE;
         }
     }
@@ -171,17 +161,17 @@ int Scheduler::sleep_thread(int num_quantums) {
     Thread * running_thread = stop_and_retrieve_running_thread();
     running_thread->set_sleep(num_quantums);
     _sleeping_threads.insert(running_thread);
-    run_topmost_thread_in_queue();
+    run_topmost_thread_in_ready_queue();
     return SUCCESS;
 }
 
-void Scheduler::_time_handler() {
+void Scheduler::internal_time_handler() {
     _total_quantoms++;
     update_sleeping_threads();
     Thread * running_thread = stop_and_retrieve_running_thread();
     running_thread->set_ready();
     _ready_queue.push_back(running_thread);
-    run_topmost_thread_in_queue();
+    run_topmost_thread_in_ready_queue();
 }
 
 Thread * Scheduler::stop_and_retrieve_running_thread() {
@@ -226,5 +216,23 @@ int Scheduler::get_quantoms_running_num(int tid) {
         return FAILURE;
     }
     return _active_threads[tid]->get_age();
+}
+
+int t = 0;
+int blocked_thread_id = -1;
+void Scheduler::static_external_time_handler(int sig) {
+    t++;
+    Scheduler &scheduler = getInstance();
+    scheduler.internal_time_handler();
+    printf("Current running thread: %d. Quantoms alive: %d. Total quantoms: %d.\n", uthread_get_tid(), uthread_get_quantums(uthread_get_tid()), uthread_get_total_quantums());
+    if(t == 5){
+        printf("Thread %d is blocked.\n",uthread_get_tid());
+        blocked_thread_id = uthread_get_tid();
+        uthread_block(blocked_thread_id);
+    }
+    if(t == 10){
+        printf("Thread %d is resumed..\n",blocked_thread_id);
+        uthread_resume(blocked_thread_id);
+    }
 }
 

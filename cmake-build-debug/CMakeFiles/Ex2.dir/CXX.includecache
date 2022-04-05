@@ -33,6 +33,10 @@ utils.h
 /cs/usr/adirt/OS/ex2/OS_Ex2/utils.h
 cassert
 -
+new
+-
+iostream
+-
 
 /cs/usr/adirt/OS/ex2/OS_Ex2/thread.h
 csetjmp
@@ -45,8 +49,6 @@ uthreads.h
 /cs/usr/adirt/OS/ex2/OS_Ex2/uthreads.h
 
 /cs/usr/adirt/OS/ex2/OS_Ex2/uthreads.cpp
-cstdio
--
 uthreads.h
 /cs/usr/adirt/OS/ex2/OS_Ex2/uthreads.h
 scheduler.h

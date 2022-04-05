@@ -1,14 +1,16 @@
 //
 // Created by adirt on 01/04/2022.
 //
-#include <cstdio>
 #include "uthreads.h"
 #include "scheduler.h"
 #define FAILURE -1
 #define SUCCESS 0
+#define ERR_MSG_MAX_THREADS_EXCEEDED "thread library error: max threads exceeded.\n";
+#define ERR_MSG_MAX_INVALID_QUANTUM "thread library error: non-positive quantum usecs.\n";
 
 int uthread_init(int quantum_usecs){
 	if(quantum_usecs <= 0){
+	    cerr << ERR_MSG_MAX_INVALID_QUANTUM;
 		return FAILURE;
 	}
 	Scheduler::getInstance(quantum_usecs);
@@ -16,11 +18,16 @@ int uthread_init(int quantum_usecs){
 }
 int uthread_spawn(thread_entry_point entry_point){
 	Scheduler &scheduler = Scheduler::getInstance();
-	return scheduler.create_thread(entry_point);
+	int new_thread_id = scheduler.create_thread(entry_point);
+    if(new_thread_id == FAILURE){
+        cerr << ERR_MSG_MAX_THREADS_EXCEEDED;
+        return FAILURE;
+    }
+	return new_thread_id;
 }
 int uthread_terminate(int tid){
 	Scheduler &scheduler = Scheduler::getInstance();
-	if(tid == 0){
+	if(tid == MAIN_THREAD_ID){
 		scheduler.~Scheduler();
 		exit(0);
 	}

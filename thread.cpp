@@ -5,28 +5,35 @@
 #include "thread.h"
 #include "utils.h"
 #include <cassert>
+#include <new>
+#include <iostream>
 #define MAIN_THREAD_ID 0
 #define NOT_SLEEPING  -1
-Thread::Thread(int id ,thread_entry_point entry_point) :
+
+Thread::Thread(int id, thread_entry_point entry_point) :
         _id(id), _state(ThreadState::READY), _env{0}, _quantoms_left_to_sleep(NOT_SLEEPING), _running_quantoms_num(0){
-    //TODO if id is unused remove it
-    _stack = new char[STACK_SIZE];
-//    int ret_val = sigsetjmp(_env, 1); // TODO check if savemask == 1
-//    if(ret_val != 0 && id != MAIN_THREAD_ID){
-//        address_t pc = (address_t) entry_point;
-//        (_env->__jmpbuf)[JB_PC] = translate_address(pc);
-//        address_t sp = (address_t) _stack + STACK_SIZE - sizeof(address_t);
-//        (_env->__jmpbuf)[JB_SP] = translate_address(sp);
-//    }
-//    sigemptyset(&_env->__saved_mask);
+    try {
+        _stack = new char[STACK_SIZE];
+    }catch (std::bad_alloc& exc){
+        std::cerr << ERR_MSG_BAD_ALLOCATION;
+        exit(1);
+    }
 }
 
 void Thread::do_jump(){
     siglongjmp(_env, _id);
 }
 
-void Thread::set_jump() {
+void Thread::set_jump(thread_entry_point entry_point) {
+        int ret_val = sigsetjmp(_env, 1); // TODO check if savemask == 1
 
+        if(ret_val != 0 && id != MAIN_THREAD_ID){
+            address_t pc = (address_t) entry_point;
+            (_env->__jmpbuf)[JB_PC] = translate_address(pc);
+            address_t sp = (address_t) _stack + STACK_SIZE - sizeof(address_t);
+            (_env->__jmpbuf)[JB_SP] = translate_address(sp);
+        }
+        sigemptyset(&_env->__saved_mask);
 }
 
 Thread::~Thread() {
@@ -38,14 +45,14 @@ bool Thread::is_blocked(bool check_if_block_only) const {
     if (_state == ThreadState::BLOCKED){
         return true;
     }
-    return !check_if_block_only && (_state == ThreadState::BLOCKED || _state == ThreadState::BLOCKED_AND_SLEEPING);
+    return !check_if_block_only && _state == ThreadState::BLOCKED_AND_SLEEPING;
 }
 
 bool Thread::is_sleeping(bool check_if_sleeping_only) const {
     if (_state == ThreadState::SLEEPING){
         return true;
     }
-    return !check_if_sleeping_only && (_state == ThreadState::SLEEPING || _state == ThreadState::BLOCKED_AND_SLEEPING);
+    return !check_if_sleeping_only && _state == ThreadState::BLOCKED_AND_SLEEPING;
 }
 
 void Thread::set_sleep(int num_quantoms) {
