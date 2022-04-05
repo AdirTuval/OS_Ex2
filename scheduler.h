@@ -25,7 +25,8 @@ private:
     unordered_set<Thread *> _sleeping_threads; //_sleeping_threads
     deque<Thread *> _ready_queue;
 public:
-    int create_thread(thread_entry_point entry_point);
+    int create_thread_and_push_to_ready(thread_entry_point entry_point);
+    Thread * create_thread(thread_entry_point entry_point);
     int terminate_thread(int tid);
     int generate_thread_id();
     Scheduler(Scheduler const&) = delete;

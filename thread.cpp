@@ -29,7 +29,8 @@ void Thread::do_jump(){
 
 Thread::~Thread() {
     delete[] _stack;
-    printf("Thread deleted");
+    printf("Thread %d deleted\n", _id);
+    fflush(stdout);
 }
 
 bool Thread::is_blocked(bool check_if_block_only) const {

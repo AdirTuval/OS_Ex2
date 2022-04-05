@@ -1,8 +1,11 @@
 //
 // Created by adirt on 01/04/2022.
 //
+#include <csignal>
+#include <cassert>
 #include "uthreads.h"
 #include "scheduler.h"
+
 #define FAILURE -1
 #define SUCCESS 0
 #define ERR_MSG_MAX_THREADS_EXCEEDED "thread library error: max threads exceeded.\n";
@@ -13,7 +16,7 @@ void change_blockage_status_sigvtalrm(int operation){
     sigset_t set;
     sigemptyset(&set);
     sigaddset(&set, SIGVTALRM);
-    sigprocmask(operation, &set, NULL);
+    sigprocmask(operation, &set, nullptr);
 }
 
 int uthread_init(int quantum_usecs){
@@ -29,7 +32,7 @@ int uthread_init(int quantum_usecs){
 int uthread_spawn(thread_entry_point entry_point){
     change_blockage_status_sigvtalrm(SIG_BLOCK);
 	Scheduler &scheduler = Scheduler::getInstance();
-	int new_thread_id = scheduler.create_thread(entry_point);
+	int new_thread_id = scheduler.create_thread_and_push_to_ready(entry_point);
     if(new_thread_id == FAILURE){
         cerr << ERR_MSG_MAX_THREADS_EXCEEDED;
         return FAILURE;
@@ -41,7 +44,6 @@ int uthread_terminate(int tid){
     change_blockage_status_sigvtalrm(SIG_BLOCK);
 	Scheduler &scheduler = Scheduler::getInstance();
 	if(tid == MAIN_THREAD_ID){
-		scheduler.~Scheduler();
 		exit(0);
 	}
 	int ret_val = scheduler.terminate_thread(tid);
@@ -83,15 +85,4 @@ int uthread_get_total_quantums(){
 }
 int uthread_get_quantums(int tid){
     return Scheduler::getInstance().get_quantoms_running_num(tid);
-}
-
-int main(){
-    uthread_init(1000000L);
-    uthread_spawn(nullptr);
-    uthread_spawn(nullptr);
-    uthread_spawn(nullptr);
-    uthread_spawn(nullptr);
-    Scheduler &scheduler = Scheduler::getInstance();
-    for(;;){}
-	return 0;
 }

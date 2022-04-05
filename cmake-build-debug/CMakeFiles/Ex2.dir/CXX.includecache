@@ -6,55 +6,13 @@
 
 #IncludeRegexTransform: 
 
-/cs/usr/adirt/OS/ex2/OS_Ex2/scheduler.cpp
-scheduler.h
-/cs/usr/adirt/OS/ex2/OS_Ex2/scheduler.h
-
-/cs/usr/adirt/OS/ex2/OS_Ex2/scheduler.h
-bits/stdc++.h
--
-csetjmp
--
+/cs/usr/adirt/OS/ex2/OS_Ex2/main.cpp
 cstdio
 -
-csignal
--
-sys/time.h
--
-ctime
--
-thread.h
-/cs/usr/adirt/OS/ex2/OS_Ex2/thread.h
-
-/cs/usr/adirt/OS/ex2/OS_Ex2/thread.cpp
-thread.h
-/cs/usr/adirt/OS/ex2/OS_Ex2/thread.h
-utils.h
-/cs/usr/adirt/OS/ex2/OS_Ex2/utils.h
-cassert
--
-new
--
-iostream
--
-
-/cs/usr/adirt/OS/ex2/OS_Ex2/thread.h
-csetjmp
--
-csignal
--
-cstdio
+cstdlib
 -
 uthreads.h
 /cs/usr/adirt/OS/ex2/OS_Ex2/uthreads.h
 
-/cs/usr/adirt/OS/ex2/OS_Ex2/uthreads.cpp
-uthreads.h
 /cs/usr/adirt/OS/ex2/OS_Ex2/uthreads.h
-scheduler.h
-/cs/usr/adirt/OS/ex2/OS_Ex2/scheduler.h
-
-/cs/usr/adirt/OS/ex2/OS_Ex2/uthreads.h
-
-/cs/usr/adirt/OS/ex2/OS_Ex2/utils.h
 

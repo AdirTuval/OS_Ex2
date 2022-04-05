@@ -8,11 +8,13 @@
 #define USEC_IN_SEC 1000000
 #define ERR_MSG_BAD_ALLOCATION "system error: stack allocation failed.\n"
 
-Scheduler::Scheduler(int quantum_usecs) : _quantum_usecs(quantum_usecs), _running_thread_id(MAIN_THREAD_ID), _total_quantoms(1){
+Scheduler::Scheduler(int quantum_usecs) : _quantum_usecs(quantum_usecs), _running_thread_id(MAIN_THREAD_ID), _total_quantoms(1), _largest_thread_id(MAIN_THREAD_ID){
     _unused_threads_id.push(MAIN_THREAD_ID);
-    _largest_thread_id = MAIN_THREAD_ID;
-    create_thread(nullptr);
-    run_topmost_thread_in_ready_queue();
+    Thread * main_thread = create_thread(nullptr);
+    assert(main_thread != nullptr);
+    _active_threads[MAIN_THREAD_ID] = main_thread;
+    main_thread->set_running();
+    init_timer_for_a_quantom();
 }
 
 int Scheduler::generate_thread_id()
@@ -50,22 +52,15 @@ int Scheduler::init_timer_for_a_quantom() const{
     return SUCCESS;
 }
 
-int Scheduler::create_thread(thread_entry_point entry_point)
+int Scheduler::create_thread_and_push_to_ready(thread_entry_point entry_point)
 {
-    if(_active_threads.size() >= MAX_THREAD_NUM){
+    Thread * new_thread = create_thread(entry_point);
+    if(new_thread == nullptr){
         return FAILURE;
     }
-    int thread_id = generate_thread_id();
-    Thread * new_thread;
-    try {
-        new_thread = new Thread(thread_id, entry_point);
-    } catch (bad_alloc&){
-        cerr << ERR_MSG_BAD_ALLOCATION;
-        exit(1);
-    }
-    _active_threads[thread_id] = new_thread;
+    _active_threads[new_thread->get_id()] = new_thread;
     _ready_queue.push_back(new_thread);
-    return thread_id;
+    return new_thread->get_id();
 }
 
 int Scheduler::terminate_thread(int tid) {
@@ -110,7 +105,6 @@ int Scheduler::run_topmost_thread_in_ready_queue(){
     //pop from queue
     //change running current thread id
     //init timer for a quantom
-    //do_jump
     if(_ready_queue.empty()){
         return FAILURE;
     }
@@ -196,13 +190,10 @@ void Scheduler::internal_time_handler() {
 //}
 
 Scheduler::~Scheduler() {
-    if(!_active_threads.empty()) {
-        for(auto & _active_thread : _active_threads){
-            delete _active_thread.second;
-        }
-        _active_threads.clear();
+    for (auto it = _active_threads.cbegin(); it != _active_threads.cend();){
+        delete it->second;
+        _active_threads.erase(it++);    // or "it = m.erase(it)" since C++11
     }
-    printf("Scheduler deleted.");
 }
 
 void Scheduler::update_sleeping_threads() {
@@ -232,21 +223,23 @@ int Scheduler::get_quantoms_running_num(int tid) {
     return _active_threads[tid]->get_age();
 }
 
-int t = 0;
-int blocked_thread_id = -1;
 void Scheduler::static_external_time_handler(int sig) {
-    t++;
     Scheduler &scheduler = getInstance();
     scheduler.internal_time_handler();
-    printf("Current running thread: %d. Quantoms alive: %d. Total quantoms: %d.\n", uthread_get_tid(), uthread_get_quantums(uthread_get_tid()), uthread_get_total_quantums());
-    if(t == 5){
-        printf("Thread %d is blocked.\n",uthread_get_tid());
-        blocked_thread_id = uthread_get_tid();
-        uthread_block(blocked_thread_id);
+}
+
+Thread *Scheduler::create_thread(thread_entry_point entry_point) {
+    if(_active_threads.size() >= MAX_THREAD_NUM){
+        return nullptr;
     }
-    if(t == 10){
-        printf("Thread %d is resumed..\n",blocked_thread_id);
-        uthread_resume(blocked_thread_id);
+    int thread_id = generate_thread_id();
+    Thread * new_thread;
+    try {
+        new_thread = new Thread(thread_id, entry_point);
+    } catch (bad_alloc&){
+        cerr << ERR_MSG_BAD_ALLOCATION;
+        exit(1);
     }
+    return new_thread;
 }
 
