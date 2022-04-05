@@ -105,6 +105,7 @@ int Scheduler::run_topmost_thread_in_ready_queue(){
     //pop from queue
     //change running current thread id
     //init timer for a quantom
+    update_sleeping_threads();
     if(_ready_queue.empty()){
         return FAILURE;
     }
@@ -170,8 +171,6 @@ int Scheduler::sleep_thread(int num_quantums) {
 
 void Scheduler::internal_time_handler() {
     _total_quantoms++;
-    update_sleeping_threads();
-//    Thread * running_thread = stop_and_retrieve_running_thread();
     Thread * running_thread = _active_threads[_running_thread_id];
     running_thread->set_ready();
     _ready_queue.push_back(running_thread);

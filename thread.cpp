@@ -12,12 +12,6 @@
 
 Thread::Thread(int id, thread_entry_point entry_point) :
         _id(id), _state(ThreadState::READY), _env{0}, _quantoms_left_to_sleep(NOT_SLEEPING), _running_quantoms_num(0){
-    try {
-        _stack = new char[STACK_SIZE];
-    }catch (std::bad_alloc& exc){
-        std::cerr << ERR_MSG_BAD_ALLOCATION;
-        exit(1);
-    }
     if(id != MAIN_THREAD_ID){
         setup_env(entry_point);
     }
@@ -25,12 +19,6 @@ Thread::Thread(int id, thread_entry_point entry_point) :
 
 void Thread::do_jump(){
     siglongjmp(_env, 3);
-}
-
-Thread::~Thread() {
-    delete[] _stack;
-    printf("Thread %d deleted\n", _id);
-    fflush(stdout);
 }
 
 bool Thread::is_blocked(bool check_if_block_only) const {

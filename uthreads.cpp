@@ -10,6 +10,7 @@
 #define SUCCESS 0
 #define ERR_MSG_MAX_THREADS_EXCEEDED "thread library error: max threads exceeded.\n";
 #define ERR_MSG_MAX_INVALID_QUANTUM "thread library error: non-positive quantum usecs.\n";
+#define ERR_MSG_MAX_INVALID_ENTRY_POINT "thread library error: null entry point.\n";
 
 void change_blockage_status_sigvtalrm(int operation){
     assert(operation == SIG_UNBLOCK or operation == SIG_BLOCK);
@@ -20,21 +21,26 @@ void change_blockage_status_sigvtalrm(int operation){
 }
 
 int uthread_init(int quantum_usecs){
-    change_blockage_status_sigvtalrm(SIG_BLOCK);
 	if(quantum_usecs <= 0){
-	    cerr << ERR_MSG_MAX_INVALID_QUANTUM;
-		return FAILURE;
-	}
-	Scheduler::getInstance(quantum_usecs);
+        cerr << ERR_MSG_MAX_INVALID_QUANTUM;
+        return FAILURE;
+    }
+    change_blockage_status_sigvtalrm(SIG_BLOCK);
+    Scheduler::getInstance(quantum_usecs);
 	change_blockage_status_sigvtalrm(SIG_UNBLOCK);
 	return SUCCESS;
 }
 int uthread_spawn(thread_entry_point entry_point){
+    if(entry_point == nullptr){
+        cerr << ERR_MSG_MAX_INVALID_ENTRY_POINT;
+        return FAILURE;
+    }
     change_blockage_status_sigvtalrm(SIG_BLOCK);
 	Scheduler &scheduler = Scheduler::getInstance();
 	int new_thread_id = scheduler.create_thread_and_push_to_ready(entry_point);
     if(new_thread_id == FAILURE){
         cerr << ERR_MSG_MAX_THREADS_EXCEEDED;
+        change_blockage_status_sigvtalrm(SIG_UNBLOCK);
         return FAILURE;
     }
     change_blockage_status_sigvtalrm(SIG_UNBLOCK);

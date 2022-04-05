@@ -14,8 +14,7 @@ private:
     enum ThreadState {RUNNING, READY, BLOCKED, SLEEPING, BLOCKED_AND_SLEEPING};
     ThreadState _state;
     sigjmp_buf _env;
-    //sigsetjump(&thread->_env)
-    char * _stack;
+    char _stack[STACK_SIZE]{};
     const int _id;
     int _quantoms_left_to_sleep;
     int _running_quantoms_num;
@@ -37,7 +36,6 @@ public:
     bool is_ready() const {return _state == ThreadState::READY;}
     int get_age() const {return _running_quantoms_num;}
     void unblock();
-    ~Thread();
 };
 
 
