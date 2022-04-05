@@ -120,7 +120,7 @@ int Scheduler::run_topmost_thread_in_ready_queue(){
     front_thread->set_running();
     _running_thread_id = front_thread->get_id();
     init_timer_for_a_quantom();
-//    front_thread->do_jump();
+    front_thread->do_jump();
     return SUCCESS;
 }
 
@@ -133,14 +133,19 @@ int Scheduler::block_thread(int tid) {
     Thread * thread_to_block = _active_threads[tid];
     if(thread_to_block->is_running()){
         assert(_running_thread_id == tid);
-        stop_and_retrieve_running_thread();
+        bool executed_from_jump = thread_to_block->save_env();
+        if(executed_from_jump){
+            return SUCCESS;
+        }
+        thread_to_block->set_block();
         run_topmost_thread_in_ready_queue();
+        //TODO this is delicate place to check.
     }else if(thread_to_block->is_ready()){
         if(erase_thread_from_ready_queue(tid) != SUCCESS){
             return FAILURE;
         }
+        thread_to_block->set_block();
     }
-    thread_to_block->set_block();
     return SUCCESS;
 }
 
@@ -158,9 +163,13 @@ int Scheduler::resume_thread(int tid) {
 
 int Scheduler::sleep_thread(int num_quantums) {
     assert(_running_thread_id != MAIN_THREAD_ID);
-    Thread * running_thread = stop_and_retrieve_running_thread();
+    Thread * running_thread = _active_threads[_running_thread_id];
     running_thread->set_sleep(num_quantums);
     _sleeping_threads.insert(running_thread);
+    bool exectued_from_jump = running_thread->save_env();
+    if(exectued_from_jump){
+        return SUCCESS;
+    }
     run_topmost_thread_in_ready_queue();
     return SUCCESS;
 }
@@ -168,18 +177,23 @@ int Scheduler::sleep_thread(int num_quantums) {
 void Scheduler::internal_time_handler() {
     _total_quantoms++;
     update_sleeping_threads();
-    Thread * running_thread = stop_and_retrieve_running_thread();
+//    Thread * running_thread = stop_and_retrieve_running_thread();
+    Thread * running_thread = _active_threads[_running_thread_id];
     running_thread->set_ready();
     _ready_queue.push_back(running_thread);
+    bool executed_from_jump = running_thread->save_env();
+    if(executed_from_jump){
+        return;
+    }
     run_topmost_thread_in_ready_queue();
 }
 
-Thread * Scheduler::stop_and_retrieve_running_thread() {
-    Thread * running_thread = _active_threads[_running_thread_id];
-    running_thread->save_env();
-    assert(running_thread->is_running());
-    return running_thread;
-}
+//Thread * Scheduler::stop_and_retrieve_running_thread() {
+//    Thread * running_thread = _active_threads[_running_thread_id];
+//    running_thread->save_env();
+//    assert(running_thread->is_running());
+//    return running_thread;
+//}
 
 Scheduler::~Scheduler() {
     if(!_active_threads.empty()) {

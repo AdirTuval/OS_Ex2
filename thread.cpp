@@ -19,12 +19,12 @@ Thread::Thread(int id, thread_entry_point entry_point) :
         exit(1);
     }
     if(id != MAIN_THREAD_ID){
-        save_env(entry_point, true);
+        setup_env(entry_point);
     }
 }
 
 void Thread::do_jump(){
-    siglongjmp(_env, _id);
+    siglongjmp(_env, 3);
 }
 
 Thread::~Thread() {
@@ -87,19 +87,23 @@ void Thread::unblock() {
     }
 }
 
-void Thread::save_env(thread_entry_point entry_point, bool init_sp) {
-    int ret_val = sigsetjmp(_env, 1);
+int Thread::save_env() {
+    bool executed_from_jump = sigsetjmp(_env, 1) != 0;
+    return executed_from_jump;
+}
 
+void Thread::setup_env(thread_entry_point entry_point) {
+    int ret_val = sigsetjmp(_env, 1);
+    assert(ret_val == 0);
     bool did_just_save_bookmark = ret_val == 0;
     if(did_just_save_bookmark){
         if(entry_point != nullptr){
             address_t pc = (address_t) entry_point;
             (_env->__jmpbuf)[JB_PC] = translate_address(pc);
-        }
-        if(init_sp){
             address_t sp = (address_t) _stack + STACK_SIZE - sizeof(address_t);
             (_env->__jmpbuf)[JB_SP] = translate_address(sp);
         }
         sigemptyset(&(_env->__saved_mask));
     }
+
 }

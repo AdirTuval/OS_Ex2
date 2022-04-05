@@ -40,7 +40,7 @@ public:
     int get_current_running_thread_id() const {return _running_thread_id;}
     void internal_time_handler();
     static void static_external_time_handler(int sig);
-    Thread *stop_and_retrieve_running_thread();
+//    Thread *stop_and_retrieve_running_thread();
     void update_sleeping_threads();
     int get_quantoms_running_num(int tid);
     int get_total_quantoms() const;

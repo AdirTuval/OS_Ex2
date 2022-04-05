@@ -21,6 +21,7 @@ private:
     int _running_quantoms_num;
 public:
     explicit Thread(int id ,thread_entry_point entry_point = nullptr);
+    void setup_env(thread_entry_point entry_point = nullptr);
     int get_id() const {return _id;}
     void set_block() {_state = _state == ThreadState::SLEEPING ? ThreadState::BLOCKED_AND_SLEEPING : ThreadState::BLOCKED;}
     void set_running();
@@ -29,7 +30,7 @@ public:
     void update_sleep_value();
     void wake_up();
     void do_jump();
-    void save_env(thread_entry_point entry_point = nullptr, bool init_sp = false);
+    int save_env();
     bool is_running() const {return _state == ThreadState::RUNNING;}
     bool is_blocked(bool check_if_block_only = false) const;
     bool is_sleeping(bool check_if_sleeping_only = false) const;
