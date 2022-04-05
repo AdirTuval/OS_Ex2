@@ -176,7 +176,7 @@ void Scheduler::internal_time_handler() {
 
 Thread * Scheduler::stop_and_retrieve_running_thread() {
     Thread * running_thread = _active_threads[_running_thread_id];
-//    running_thread->set_jump();
+    running_thread->save_env();
     assert(running_thread->is_running());
     return running_thread;
 }

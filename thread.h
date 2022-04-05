@@ -14,6 +14,7 @@ private:
     enum ThreadState {RUNNING, READY, BLOCKED, SLEEPING, BLOCKED_AND_SLEEPING};
     ThreadState _state;
     sigjmp_buf _env;
+    //sigsetjump(&thread->_env)
     char * _stack;
     const int _id;
     int _quantoms_left_to_sleep;
@@ -28,7 +29,7 @@ public:
     void update_sleep_value();
     void wake_up();
     void do_jump();
-    void set_jump(thread_entry_point entry_point);
+    void save_env(thread_entry_point entry_point = nullptr, bool init_sp = false);
     bool is_running() const {return _state == ThreadState::RUNNING;}
     bool is_blocked(bool check_if_block_only = false) const;
     bool is_sleeping(bool check_if_sleeping_only = false) const;
