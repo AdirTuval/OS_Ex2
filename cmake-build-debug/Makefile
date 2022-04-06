@@ -129,30 +129,6 @@ Ex2/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Ex2.dir/build.make CMakeFiles/Ex2.dir/build
 .PHONY : Ex2/fast
 
-main.o: main.cpp.o
-.PHONY : main.o
-
-# target to build an object file
-main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Ex2.dir/build.make CMakeFiles/Ex2.dir/main.cpp.o
-.PHONY : main.cpp.o
-
-main.i: main.cpp.i
-.PHONY : main.i
-
-# target to preprocess a source file
-main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Ex2.dir/build.make CMakeFiles/Ex2.dir/main.cpp.i
-.PHONY : main.cpp.i
-
-main.s: main.cpp.s
-.PHONY : main.s
-
-# target to generate assembly for a file
-main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Ex2.dir/build.make CMakeFiles/Ex2.dir/main.cpp.s
-.PHONY : main.cpp.s
-
 scheduler.o: scheduler.cpp.o
 .PHONY : scheduler.o
 
@@ -176,6 +152,30 @@ scheduler.s: scheduler.cpp.s
 scheduler.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Ex2.dir/build.make CMakeFiles/Ex2.dir/scheduler.cpp.s
 .PHONY : scheduler.cpp.s
+
+tests/test7_no_out_different.o: tests/test7_no_out_different.cpp.o
+.PHONY : tests/test7_no_out_different.o
+
+# target to build an object file
+tests/test7_no_out_different.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Ex2.dir/build.make CMakeFiles/Ex2.dir/tests/test7_no_out_different.cpp.o
+.PHONY : tests/test7_no_out_different.cpp.o
+
+tests/test7_no_out_different.i: tests/test7_no_out_different.cpp.i
+.PHONY : tests/test7_no_out_different.i
+
+# target to preprocess a source file
+tests/test7_no_out_different.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Ex2.dir/build.make CMakeFiles/Ex2.dir/tests/test7_no_out_different.cpp.i
+.PHONY : tests/test7_no_out_different.cpp.i
+
+tests/test7_no_out_different.s: tests/test7_no_out_different.cpp.s
+.PHONY : tests/test7_no_out_different.s
+
+# target to generate assembly for a file
+tests/test7_no_out_different.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Ex2.dir/build.make CMakeFiles/Ex2.dir/tests/test7_no_out_different.cpp.s
+.PHONY : tests/test7_no_out_different.cpp.s
 
 thread.o: thread.cpp.o
 .PHONY : thread.o
@@ -234,12 +234,12 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... Ex2"
-	@echo "... main.o"
-	@echo "... main.i"
-	@echo "... main.s"
 	@echo "... scheduler.o"
 	@echo "... scheduler.i"
 	@echo "... scheduler.s"
+	@echo "... tests/test7_no_out_different.o"
+	@echo "... tests/test7_no_out_different.i"
+	@echo "... tests/test7_no_out_different.s"
 	@echo "... thread.o"
 	@echo "... thread.i"
 	@echo "... thread.s"

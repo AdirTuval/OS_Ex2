@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/Ex2.dir/main.cpp.o"
   "CMakeFiles/Ex2.dir/scheduler.cpp.o"
+  "CMakeFiles/Ex2.dir/tests/test7_no_out_different.cpp.o"
   "CMakeFiles/Ex2.dir/thread.cpp.o"
   "CMakeFiles/Ex2.dir/uthreads.cpp.o"
   "Ex2"

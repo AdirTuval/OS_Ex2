@@ -105,25 +105,25 @@ CMakeFiles/Ex2.dir/thread.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Ex2.dir/thread.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /cs/usr/adirt/OS/ex2/OS_Ex2/thread.cpp -o CMakeFiles/Ex2.dir/thread.cpp.s
 
-CMakeFiles/Ex2.dir/main.cpp.o: CMakeFiles/Ex2.dir/flags.make
-CMakeFiles/Ex2.dir/main.cpp.o: ../main.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/cs/usr/adirt/OS/ex2/OS_Ex2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/Ex2.dir/main.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Ex2.dir/main.cpp.o -c /cs/usr/adirt/OS/ex2/OS_Ex2/main.cpp
+CMakeFiles/Ex2.dir/tests/test7_no_out_different.cpp.o: CMakeFiles/Ex2.dir/flags.make
+CMakeFiles/Ex2.dir/tests/test7_no_out_different.cpp.o: ../tests/test7_no_out_different.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/cs/usr/adirt/OS/ex2/OS_Ex2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/Ex2.dir/tests/test7_no_out_different.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Ex2.dir/tests/test7_no_out_different.cpp.o -c /cs/usr/adirt/OS/ex2/OS_Ex2/tests/test7_no_out_different.cpp
 
-CMakeFiles/Ex2.dir/main.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Ex2.dir/main.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /cs/usr/adirt/OS/ex2/OS_Ex2/main.cpp > CMakeFiles/Ex2.dir/main.cpp.i
+CMakeFiles/Ex2.dir/tests/test7_no_out_different.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Ex2.dir/tests/test7_no_out_different.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /cs/usr/adirt/OS/ex2/OS_Ex2/tests/test7_no_out_different.cpp > CMakeFiles/Ex2.dir/tests/test7_no_out_different.cpp.i
 
-CMakeFiles/Ex2.dir/main.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Ex2.dir/main.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /cs/usr/adirt/OS/ex2/OS_Ex2/main.cpp -o CMakeFiles/Ex2.dir/main.cpp.s
+CMakeFiles/Ex2.dir/tests/test7_no_out_different.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Ex2.dir/tests/test7_no_out_different.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /cs/usr/adirt/OS/ex2/OS_Ex2/tests/test7_no_out_different.cpp -o CMakeFiles/Ex2.dir/tests/test7_no_out_different.cpp.s
 
 # Object files for target Ex2
 Ex2_OBJECTS = \
 "CMakeFiles/Ex2.dir/uthreads.cpp.o" \
 "CMakeFiles/Ex2.dir/scheduler.cpp.o" \
 "CMakeFiles/Ex2.dir/thread.cpp.o" \
-"CMakeFiles/Ex2.dir/main.cpp.o"
+"CMakeFiles/Ex2.dir/tests/test7_no_out_different.cpp.o"
 
 # External object files for target Ex2
 Ex2_EXTERNAL_OBJECTS =
@@ -131,7 +131,7 @@ Ex2_EXTERNAL_OBJECTS =
 Ex2: CMakeFiles/Ex2.dir/uthreads.cpp.o
 Ex2: CMakeFiles/Ex2.dir/scheduler.cpp.o
 Ex2: CMakeFiles/Ex2.dir/thread.cpp.o
-Ex2: CMakeFiles/Ex2.dir/main.cpp.o
+Ex2: CMakeFiles/Ex2.dir/tests/test7_no_out_different.cpp.o
 Ex2: CMakeFiles/Ex2.dir/build.make
 Ex2: CMakeFiles/Ex2.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/cs/usr/adirt/OS/ex2/OS_Ex2/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable Ex2"

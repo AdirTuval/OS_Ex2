@@ -8,8 +8,8 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/cs/usr/adirt/OS/ex2/OS_Ex2/main.cpp" "/cs/usr/adirt/OS/ex2/OS_Ex2/cmake-build-debug/CMakeFiles/Ex2.dir/main.cpp.o"
   "/cs/usr/adirt/OS/ex2/OS_Ex2/scheduler.cpp" "/cs/usr/adirt/OS/ex2/OS_Ex2/cmake-build-debug/CMakeFiles/Ex2.dir/scheduler.cpp.o"
+  "/cs/usr/adirt/OS/ex2/OS_Ex2/tests/test7_no_out_different.cpp" "/cs/usr/adirt/OS/ex2/OS_Ex2/cmake-build-debug/CMakeFiles/Ex2.dir/tests/test7_no_out_different.cpp.o"
   "/cs/usr/adirt/OS/ex2/OS_Ex2/thread.cpp" "/cs/usr/adirt/OS/ex2/OS_Ex2/cmake-build-debug/CMakeFiles/Ex2.dir/thread.cpp.o"
   "/cs/usr/adirt/OS/ex2/OS_Ex2/uthreads.cpp" "/cs/usr/adirt/OS/ex2/OS_Ex2/cmake-build-debug/CMakeFiles/Ex2.dir/uthreads.cpp.o"
   )

@@ -84,13 +84,13 @@
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/cs/usr/adirt/OS/ex2/OS_Ex2/main.cpp">
-			<Option target="Ex2"/>
-		</Unit>
 		<Unit filename="/cs/usr/adirt/OS/ex2/OS_Ex2/scheduler.cpp">
 			<Option target="Ex2"/>
 		</Unit>
 		<Unit filename="/cs/usr/adirt/OS/ex2/OS_Ex2/scheduler.h">
+			<Option target="Ex2"/>
+		</Unit>
+		<Unit filename="/cs/usr/adirt/OS/ex2/OS_Ex2/tests/test7_no_out_different.cpp">
 			<Option target="Ex2"/>
 		</Unit>
 		<Unit filename="/cs/usr/adirt/OS/ex2/OS_Ex2/thread.cpp">

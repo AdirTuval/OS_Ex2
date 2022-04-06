@@ -45,6 +45,8 @@ public:
     void update_sleeping_threads();
     int get_quantoms_running_num(int tid);
     int get_total_quantoms() const;
+    static void change_blockage_status_sigvtalrm(int operation);
+
     ~Scheduler();
 };
 

@@ -1,1 +1,1 @@
-/usr/bin/c++ -g CMakeFiles/Ex2.dir/uthreads.cpp.o CMakeFiles/Ex2.dir/scheduler.cpp.o CMakeFiles/Ex2.dir/thread.cpp.o CMakeFiles/Ex2.dir/main.cpp.o -o Ex2 
+/usr/bin/c++ -g CMakeFiles/Ex2.dir/uthreads.cpp.o CMakeFiles/Ex2.dir/scheduler.cpp.o CMakeFiles/Ex2.dir/thread.cpp.o CMakeFiles/Ex2.dir/tests/test7_no_out_different.cpp.o -o Ex2 

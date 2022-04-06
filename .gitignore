@@ -1,3 +1,7 @@
 *.[oa]
 desktop.ini
-.idea
+cmake-build-debug/
+CMakeLists.txt
+demos/
+.idea/
+tests/

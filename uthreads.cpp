@@ -11,84 +11,118 @@
 #define ERR_MSG_MAX_THREADS_EXCEEDED "thread library error: max threads exceeded.\n";
 #define ERR_MSG_MAX_INVALID_QUANTUM "thread library error: non-positive quantum usecs.\n";
 #define ERR_MSG_MAX_INVALID_ENTRY_POINT "thread library error: null entry point.\n";
-
-void change_blockage_status_sigvtalrm(int operation){
-    assert(operation == SIG_UNBLOCK or operation == SIG_BLOCK);
-    sigset_t set;
-    sigemptyset(&set);
-    sigaddset(&set, SIGVTALRM);
-    sigprocmask(operation, &set, nullptr);
-}
-
+#define ERR_MSG_THREAD_NOT_FOUND "thread library error: thread not found.\n";
+#define ERR_MSG_MAIN_THREAD_BLOCK "thread library error: can not block main thread.\n";
+#define ERR_MSG_MAIN_THREAD_SLEEP "thread library error: can not sleep main thread.\n";
 int uthread_init(int quantum_usecs){
 	if(quantum_usecs <= 0){
         cerr << ERR_MSG_MAX_INVALID_QUANTUM;
         return FAILURE;
     }
-    change_blockage_status_sigvtalrm(SIG_BLOCK);
+	Scheduler::change_blockage_status_sigvtalrm(SIG_BLOCK);
     Scheduler::getInstance(quantum_usecs);
-	change_blockage_status_sigvtalrm(SIG_UNBLOCK);
+    Scheduler::change_blockage_status_sigvtalrm(SIG_UNBLOCK);
 	return SUCCESS;
 }
 int uthread_spawn(thread_entry_point entry_point){
+    Scheduler::change_blockage_status_sigvtalrm(SIG_BLOCK);
     if(entry_point == nullptr){
         cerr << ERR_MSG_MAX_INVALID_ENTRY_POINT;
+        Scheduler::change_blockage_status_sigvtalrm(SIG_UNBLOCK);
         return FAILURE;
     }
-    change_blockage_status_sigvtalrm(SIG_BLOCK);
 	Scheduler &scheduler = Scheduler::getInstance();
 	int new_thread_id = scheduler.create_thread_and_push_to_ready(entry_point);
     if(new_thread_id == FAILURE){
         cerr << ERR_MSG_MAX_THREADS_EXCEEDED;
-        change_blockage_status_sigvtalrm(SIG_UNBLOCK);
+        Scheduler::change_blockage_status_sigvtalrm(SIG_UNBLOCK);
         return FAILURE;
     }
-    change_blockage_status_sigvtalrm(SIG_UNBLOCK);
+    Scheduler::change_blockage_status_sigvtalrm(SIG_UNBLOCK);
 	return new_thread_id;
 }
 int uthread_terminate(int tid){
-    change_blockage_status_sigvtalrm(SIG_BLOCK);
+    Scheduler::change_blockage_status_sigvtalrm(SIG_BLOCK);
 	Scheduler &scheduler = Scheduler::getInstance();
 	if(tid == MAIN_THREAD_ID){
 		exit(0);
 	}
-	int ret_val = scheduler.terminate_thread(tid);
-	change_blockage_status_sigvtalrm(SIG_UNBLOCK);
-	return ret_val;
+	int terminated_thread_id = scheduler.terminate_thread(tid);
+	if(terminated_thread_id == FAILURE){
+	    cerr << ERR_MSG_THREAD_NOT_FOUND;
+        Scheduler::change_blockage_status_sigvtalrm(SIG_UNBLOCK);
+        return FAILURE;
+    }
+    Scheduler::change_blockage_status_sigvtalrm(SIG_UNBLOCK);
+	return terminated_thread_id;
 }
 int uthread_block(int tid){
-    change_blockage_status_sigvtalrm(SIG_BLOCK);
-    if(tid == 0){
+    Scheduler::change_blockage_status_sigvtalrm(SIG_BLOCK);
+    if(tid == MAIN_THREAD_ID){
+        cerr << ERR_MSG_MAIN_THREAD_BLOCK;
+        Scheduler::change_blockage_status_sigvtalrm(SIG_UNBLOCK);
         return FAILURE;
     }
     Scheduler &scheduler = Scheduler::getInstance();
-    int ret_val = scheduler.block_thread(tid);
-    change_blockage_status_sigvtalrm(SIG_UNBLOCK);
-    return ret_val;
+    int blocked_thread_id = scheduler.block_thread(tid);
+    if(blocked_thread_id == FAILURE){
+        cerr << ERR_MSG_THREAD_NOT_FOUND;
+        Scheduler::change_blockage_status_sigvtalrm(SIG_UNBLOCK);
+        return FAILURE;
+    }
+    Scheduler::change_blockage_status_sigvtalrm(SIG_UNBLOCK);
+    return blocked_thread_id;
 }
 int uthread_resume(int tid){
-    change_blockage_status_sigvtalrm(SIG_BLOCK);
+    Scheduler::change_blockage_status_sigvtalrm(SIG_BLOCK);
     Scheduler &scheduler = Scheduler::getInstance();
-    int ret_val = scheduler.resume_thread(tid);
-    change_blockage_status_sigvtalrm(SIG_UNBLOCK);
-    return ret_val;
-}
-int uthread_sleep(int num_quantums){
-    change_blockage_status_sigvtalrm(SIG_BLOCK);
-    Scheduler &scheduler = Scheduler::getInstance();
-    if(scheduler.get_current_running_thread_id() == MAIN_THREAD_ID){
+    int resumed_thread_id = scheduler.resume_thread(tid);
+    if(resumed_thread_id == FAILURE){
+        cerr << ERR_MSG_THREAD_NOT_FOUND;
+        Scheduler::change_blockage_status_sigvtalrm(SIG_UNBLOCK);
         return FAILURE;
     }
-    int ret_val = scheduler.sleep_thread(num_quantums);
-    change_blockage_status_sigvtalrm(SIG_UNBLOCK);
-    return ret_val;
+    Scheduler::change_blockage_status_sigvtalrm(SIG_UNBLOCK);
+    return resumed_thread_id;
+}
+int uthread_sleep(int num_quantums){
+    Scheduler::change_blockage_status_sigvtalrm(SIG_BLOCK);
+    Scheduler &scheduler = Scheduler::getInstance();
+    if(scheduler.get_current_running_thread_id() == MAIN_THREAD_ID){
+        cerr << ERR_MSG_MAIN_THREAD_SLEEP;
+        Scheduler::change_blockage_status_sigvtalrm(SIG_UNBLOCK);
+        return FAILURE;
+    }
+    int sleep_thread_id = scheduler.sleep_thread(num_quantums);
+    if(sleep_thread_id == FAILURE){
+        cerr << ERR_MSG_THREAD_NOT_FOUND;
+        Scheduler::change_blockage_status_sigvtalrm(SIG_UNBLOCK);
+        return FAILURE;
+    }
+    Scheduler::change_blockage_status_sigvtalrm(SIG_UNBLOCK);
+    return sleep_thread_id;
 }
 int uthread_get_tid(){
-    return Scheduler::getInstance().get_current_running_thread_id();
+    Scheduler::change_blockage_status_sigvtalrm(SIG_BLOCK);
+    int ret_val = Scheduler::getInstance().get_current_running_thread_id();
+    Scheduler::change_blockage_status_sigvtalrm(SIG_UNBLOCK);
+    return ret_val;
 }
 int uthread_get_total_quantums(){
-    return Scheduler::getInstance().get_total_quantoms();
+    Scheduler::change_blockage_status_sigvtalrm(SIG_BLOCK);
+    int ret_val = Scheduler::getInstance().get_total_quantoms();
+    Scheduler::change_blockage_status_sigvtalrm(SIG_UNBLOCK);
+    return ret_val;
+
 }
 int uthread_get_quantums(int tid){
-    return Scheduler::getInstance().get_quantoms_running_num(tid);
+    Scheduler::change_blockage_status_sigvtalrm(SIG_BLOCK);
+    int quantums_num = Scheduler::getInstance().get_quantoms_running_num(tid);
+    if(quantums_num == FAILURE){
+        cerr << ERR_MSG_THREAD_NOT_FOUND;
+        Scheduler::change_blockage_status_sigvtalrm(SIG_UNBLOCK);
+        return FAILURE;
+    }
+    Scheduler::change_blockage_status_sigvtalrm(SIG_UNBLOCK);
+    return quantums_num;
 }

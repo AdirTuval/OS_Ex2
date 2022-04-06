@@ -59,6 +59,7 @@ int Scheduler::create_thread_and_push_to_ready(thread_entry_point entry_point)
         return FAILURE;
     }
     _active_threads[new_thread->get_id()] = new_thread;
+    assert(new_thread->is_ready());
     _ready_queue.push_back(new_thread);
     return new_thread->get_id();
 }
@@ -67,23 +68,23 @@ int Scheduler::terminate_thread(int tid) {
     if(_active_threads.find(tid) == _active_threads.end()){
         return FAILURE;
     }
-    //TODO if thread is running, then we should push new thread to running
     Thread * thread_to_terminate = _active_threads[tid];
-//    if(thread_to_terminate->get_state() == ThreadState::RUNNING || thread_to_terminate->get_state() == ThreadState::BLOCKED){
-    if(thread_to_terminate->is_running() || thread_to_terminate->is_blocked()){
-        _active_threads.erase(tid);
-        _unused_threads_id.push(tid);
+    _active_threads.erase(tid);
+    _unused_threads_id.push(tid);
+
+    if(thread_to_terminate->is_running()){
         delete thread_to_terminate;
         run_topmost_thread_in_ready_queue();
-         return SUCCESS;
-    }
-    else { // Thread is ready.
-        if(erase_thread_from_ready_queue(tid) == FAILURE){
-            //TODO print error
-            return FAILURE;
-        }
         return SUCCESS;
     }
+    if(thread_to_terminate->is_sleeping()){
+        _sleeping_threads.erase(thread_to_terminate);
+    }
+    if(thread_to_terminate->is_ready()){
+        erase_thread_from_ready_queue(tid);
+    }
+    delete thread_to_terminate;
+    return SUCCESS;
 }
 
 int Scheduler::erase_thread_from_ready_queue(int tid) {
@@ -105,6 +106,7 @@ int Scheduler::run_topmost_thread_in_ready_queue(){
     //pop from queue
     //change running current thread id
     //init timer for a quantom
+    _total_quantoms++;
     update_sleeping_threads();
     if(_ready_queue.empty()){
         return FAILURE;
@@ -115,12 +117,12 @@ int Scheduler::run_topmost_thread_in_ready_queue(){
     front_thread->set_running();
     _running_thread_id = front_thread->get_id();
     init_timer_for_a_quantom();
+    Scheduler::change_blockage_status_sigvtalrm(SIG_UNBLOCK);
     front_thread->do_jump();
     return SUCCESS;
 }
 
 int Scheduler::block_thread(int tid) {
-    //Assuming tid != 0
     assert(tid != 0);
     if(_active_threads.find(tid) == _active_threads.end()){
         return FAILURE;
@@ -149,6 +151,9 @@ int Scheduler::resume_thread(int tid) {
         return FAILURE;
     }
     Thread * thread_to_resume = _active_threads[tid];
+    if(not thread_to_resume->is_blocked()){
+        return SUCCESS;
+    }
     thread_to_resume->unblock();
     if(thread_to_resume->is_ready()){
         _ready_queue.push_back(thread_to_resume);
@@ -170,7 +175,6 @@ int Scheduler::sleep_thread(int num_quantums) {
 }
 
 void Scheduler::internal_time_handler() {
-    _total_quantoms++;
     Thread * running_thread = _active_threads[_running_thread_id];
     running_thread->set_ready();
     _ready_queue.push_back(running_thread);
@@ -180,13 +184,6 @@ void Scheduler::internal_time_handler() {
     }
     run_topmost_thread_in_ready_queue();
 }
-
-//Thread * Scheduler::stop_and_retrieve_running_thread() {
-//    Thread * running_thread = _active_threads[_running_thread_id];
-//    running_thread->save_env();
-//    assert(running_thread->is_running());
-//    return running_thread;
-//}
 
 Scheduler::~Scheduler() {
     for (auto it = _active_threads.cbegin(); it != _active_threads.cend();){
@@ -240,5 +237,13 @@ Thread *Scheduler::create_thread(thread_entry_point entry_point) {
         exit(1);
     }
     return new_thread;
+}
+
+void Scheduler::change_blockage_status_sigvtalrm(int operation) {
+    assert(operation == SIG_UNBLOCK or operation == SIG_BLOCK);
+    sigset_t set;
+    sigemptyset(&set);
+    sigaddset(&set, SIGVTALRM);
+    sigprocmask(operation, &set, nullptr);
 }
 
